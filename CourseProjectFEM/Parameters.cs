@@ -14,7 +14,7 @@ public class Parameters
       {
          case 1: return 1;
          case 2: return 2;
-         default: return 1;
+         default: return 2;
       }
    }
 
@@ -24,7 +24,7 @@ public class Parameters
       {
          case 1: return 1;
          case 2: return 2;
-         default: return 1;
+         default: return 3;
       }
    }
 
@@ -40,7 +40,7 @@ public class Parameters
 
    public static double F(double x, double y, double t)
    {
-      return 6 * t + 3 * t * t;
+      return 6 * t + 9 * t * t;
    }
 
    public static double U(double x, double y, double t)
@@ -50,6 +50,6 @@ public class Parameters
 
    public static double dU_dn(double x, double y, double t)
    {
-      return -1;
+      return -2;
    }
 }

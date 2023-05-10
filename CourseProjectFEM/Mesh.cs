@@ -29,6 +29,8 @@ public class Mesh
    private (int, int, int, int, int)[] _areas;
    private List<int[]> _boundaryConditions;
 
+   private List<List<int>> _allRibs;
+
    // Кринж.
    private List<Point2D> _points;
    private List<int[]> _elements;
@@ -52,6 +54,7 @@ public class Mesh
 
    public Mesh()
    {
+      _allRibs = new();
       _boundaryRibs2 = new();
       _areaNodes = new Dictionary<int, int>();
       _boundaryConditions = new();
@@ -256,9 +259,9 @@ public class Mesh
                {
                   if (_boundaryConditions[j][0] == 1)
                      _boundaryNodes1.Add(i);
-                  else
+                  if (_boundaryConditions[j][0] == 2)
                      _boundaryNodes2.Add(i);
-                  break;
+                  //break;
                }
             }
          }
@@ -282,17 +285,23 @@ public class Mesh
 
       // TODO: Кринж со списком рёбер.
       _boundaryRibs2 = new List<int>[_points.Count].Select(_ => new List<int>()).ToList();
+      _allRibs = new List<int>[_points.Count].Select(_ => new List<int>()).ToList();
       foreach (var element in Elements)
          foreach (var position in element)
             foreach (var node in element)
                if (position < node)
                   // Нестабильная штука.
                   if (_points[position].X == _points[node].X || _points[position].Y == _points[node].Y)
-                     if (_boundaryNodes2.Contains(position) && _boundaryNodes2.Contains(node))
+                  {
+                     if(!_fictiveNodes.Contains(position) && !_fictiveNodes.Contains(node))
+                        _allRibs[position].Add(node);
+                     if (_boundaryNodes2.Contains(position) && _boundaryNodes2.Contains(node) && !_boundaryRibs2[position].Contains(node))
                         _boundaryRibs2[position].Add(node);
+                  }
+
    }
 
-   public void Output(string filepath1)
+   public void Output(string filepath1, string filepath2)
    {
       try
       {
@@ -300,6 +309,13 @@ public class Mesh
          {
             foreach (var point in _points)
             sw.WriteLine(point.ToString());
+         }
+
+         using (var sw = new StreamWriter(filepath2))
+         {
+            for (int i = 0; i < _allRibs.Count; i++)
+               for (int j = 0; j < _allRibs[i].Count; j++)
+                  sw.WriteLine($"{_points[i]} {_points[_allRibs[i][j]]}");
          }
       }
       catch (Exception ex)
